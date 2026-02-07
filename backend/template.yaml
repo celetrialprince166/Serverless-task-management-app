@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Task Management System - SAM Template for Local Testing
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        TASKS_TABLE: taskmanager-dev-tasks
+        USERS_TABLE: taskmanager-dev-users
+        LOG_LEVEL: DEBUG
+        IS_OFFLINE: "true"
+        DYNAMODB_ENDPOINT: http://host.docker.internal:8000
+        ALLOWED_ORIGIN: "*"
+
+Resources:
+  # Health Check
+  HealthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/handlers/health.handler
+      CodeUri: .
+      Events:
+        Health:
+          Type: Api
+          Properties:
+            Path: /api/v1/health
+            Method: get
+
+  # Task Handlers
+  CreateTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/handlers/tasks/create.handler
+      CodeUri: .
+      Events:
+        CreateTask:
+          Type: Api
+          Properties:
+            Path: /api/v1/tasks
+            Method: post
+
+  ListTasksFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/handlers/tasks/list.handler
+      CodeUri: .
+      Events:
+        ListTasks:
+          Type: Api
+          Properties:
+            Path: /api/v1/tasks
+            Method: get
+
+  GetTaskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/handlers/tasks/get.handler
+      CodeUri: .
+      Events:
+        GetTask:
+          Type: Api
+          Properties:
+            Path: /api/v1/tasks/{taskId}
+            Method: get
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/api/v1/"

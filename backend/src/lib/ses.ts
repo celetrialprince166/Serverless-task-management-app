@@ -1,0 +1,93 @@
+/**
+ * SES client for sending notification emails
+ */
+
+import {
+    SESClient,
+    SendEmailCommand,
+    type SendEmailCommandInput,
+} from '@aws-sdk/client-ses';
+import { Logger } from './logger';
+
+const logger = new Logger('lib/ses');
+const client = new SESClient({});
+
+const DEFAULT_FROM = process.env.SES_FROM_EMAIL ?? 'notifications@taskmanager.local';
+const APP_NAME = process.env.APP_NAME ?? 'Task Manager';
+
+export interface SendEmailParams {
+    to: string[];
+    subject: string;
+    htmlBody: string;
+    textBody?: string;
+    replyTo?: string;
+}
+
+/**
+ * Send an email via SES.
+ * Uses SES_FROM_EMAIL env for From; in sandbox, To addresses must be verified.
+ */
+export async function sendEmail(params: SendEmailParams): Promise<string | null> {
+    const { to, subject, htmlBody, textBody } = params;
+    if (!to.length) {
+        logger.warn('sendEmail: no recipients');
+        return null;
+    }
+    const input: SendEmailCommandInput = {
+        Source: `${APP_NAME} <${DEFAULT_FROM}>`,
+        Destination: {
+            ToAddresses: to,
+        },
+        Message: {
+            Subject: { Data: subject, Charset: 'UTF-8' },
+            Body: {
+                Html: { Data: htmlBody, Charset: 'UTF-8' },
+                ...(textBody
+                    ? { Text: { Data: textBody, Charset: 'UTF-8' } }
+                    : {}),
+            },
+        },
+        ...(params.replyTo ? { ReplyToAddresses: [params.replyTo] } : {}),
+    };
+    try {
+        const result = await client.send(new SendEmailCommand(input));
+        logger.info('Email sent', { messageId: result.MessageId, to: to.length });
+        return result.MessageId ?? null;
+    } catch (err) {
+        logger.error('SES send failed', { err, subject, to });
+        throw err;
+    }
+}
+
+/**
+ * Build a simple branded HTML wrapper (matches templates/email-html/base.html)
+ */
+export function wrapEmailHtml(title: string, bodyHtml: string): string {
+    const year = new Date().getFullYear();
+    return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>${escapeHtml(title)}</title></head>
+<body style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f3f4f6;padding:24px;">
+  <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.08);overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);padding:24px;text-align:center;">
+      <span style="color:#fff;font-size:20px;font-weight:700;">${escapeHtml(APP_NAME)}</span>
+    </div>
+    <div style="padding:28px 24px;">
+      <h1 style="margin:0 0 16px;font-size:20px;color:#111827;">${escapeHtml(title)}</h1>
+      <div style="color:#4b5563;line-height:1.6;font-size:15px;">${bodyHtml}</div>
+    </div>
+    <div style="padding:16px 24px;background:#f9fafb;border-top:1px solid #e5e7eb;">
+      <p style="margin:0;font-size:12px;color:#6b7280;">&copy; ${year} ${escapeHtml(APP_NAME)}. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function escapeHtml(s: string): string {
+    return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}

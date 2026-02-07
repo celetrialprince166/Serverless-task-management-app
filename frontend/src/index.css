@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #fdf8f6;
+  --color-primary-100: #f2e8e5;
+  --color-primary-200: #eaddd7;
+  --color-primary-300: #e0cec7;
+  --color-primary-400: #d2bab0;
+  --color-primary-500: #a67c52;
+  --color-primary-600: #976a45;
+  --color-primary-700: #865b3b;
+  --color-primary-800: #6d4830;
+  --color-primary-900: #5a3d2b;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}

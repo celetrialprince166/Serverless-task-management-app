@@ -1,0 +1,712 @@
+openapi: 3.0.3
+info:
+  title: Task Management System API
+  description: |
+    REST API for the Serverless Task Management System.
+    
+    ## Authentication
+    All endpoints except `/health` require a valid JWT token in the Authorization header.
+    Tokens are obtained from AWS Cognito after successful authentication.
+    
+    ## Roles
+    - **Admin**: Full CRUD access to all resources
+    - **Member**: Read access to assigned tasks, can update task status only
+    
+    ## Email Domain Restriction
+    Only users with `@amalitech.com` or `@amalitechtraining.org` emails can register.
+  version: 1.0.0
+  contact:
+    name: Prince Ayiku
+    email: prince@amalitech.com
+
+servers:
+  - url: https://api.taskmanager.amalitech.com/api/v1
+    description: Production
+  - url: https://api-staging.taskmanager.amalitech.com/api/v1
+    description: Staging
+  - url: https://api-dev.taskmanager.amalitech.com/api/v1
+    description: Development
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Tasks
+    description: Task management operations
+  - name: Users
+    description: User management operations
+  - name: Assignments
+    description: Task assignment operations
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns API health status
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /tasks:
+    post:
+      tags: [Tasks]
+      summary: Create a new task
+      description: Admin only. Creates a new task.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    get:
+      tags: [Tasks]
+      summary: List tasks
+      description: |
+        Returns a list of tasks.
+        - Admins see all tasks
+        - Members see only assigned tasks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/TaskStatus'
+        - name: priority
+          in: query
+          schema:
+            $ref: '#/components/schemas/Priority'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tasks/{taskId}:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Tasks]
+      summary: Get task by ID
+      description: Returns a single task by ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Tasks]
+      summary: Update task
+      description: Admin only. Updates all task fields.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Tasks]
+      summary: Delete task
+      description: Admin only. Deletes a task.
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Task deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tasks/{taskId}/status:
+    patch:
+      tags: [Tasks]
+      summary: Update task status
+      description: |
+        Updates task status only.
+        - Admins can update any task
+        - Members can update only assigned tasks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  $ref: '#/components/schemas/TaskStatus'
+      responses:
+        '200':
+          description: Status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tasks/{taskId}/assignments:
+    parameters:
+      - name: taskId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    post:
+      tags: [Assignments]
+      summary: Assign users to task
+      description: Admin only. Assigns one or more users to a task.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userIds]
+              properties:
+                userIds:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  minItems: 1
+      responses:
+        '200':
+          description: Users assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+    get:
+      tags: [Assignments]
+      summary: List task assignments
+      description: Returns all users assigned to a task
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of assigned users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  taskId:
+                    type: string
+                  assignees:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tasks/{taskId}/assignments/{userId}:
+    delete:
+      tags: [Assignments]
+      summary: Unassign user from task
+      description: Admin only. Removes a user from a task.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User unassigned successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      description: Returns the profile of the authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [Users]
+      summary: Update current user profile
+      description: Updates the profile of the authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List all users
+      description: Admin only. Returns a list of all users.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          schema:
+            $ref: '#/components/schemas/Role'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserStatus'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /users/{userId}:
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      description: Admin only. Returns a user by ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from AWS Cognito
+
+  schemas:
+    # Enums
+    TaskStatus:
+      type: string
+      enum: [OPEN, IN_PROGRESS, UNDER_REVIEW, COMPLETED, CLOSED]
+      
+    Priority:
+      type: string
+      enum: [LOW, MEDIUM, HIGH, URGENT]
+      
+    Role:
+      type: string
+      enum: [ADMIN, MEMBER]
+      
+    UserStatus:
+      type: string
+      enum: [ACTIVE, INACTIVE, PENDING_VERIFICATION]
+
+    # Request Bodies
+    CreateTaskRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        priority:
+          $ref: '#/components/schemas/Priority'
+          default: MEDIUM
+        dueDate:
+          type: string
+          format: date-time
+        assignedTo:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 2000
+        priority:
+          $ref: '#/components/schemas/Priority'
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        dueDate:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+
+    # Response Objects
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        priority:
+          $ref: '#/components/schemas/Priority'
+        createdBy:
+          $ref: '#/components/schemas/UserSummary'
+        assignedTo:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSummary'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrevious:
+          type: boolean
+
+    TaskListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    UserListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+        path:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Invalid request body or parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: BadRequest
+            message: Task title is required
+            details:
+              field: title
+              constraint: required
+            timestamp: '2026-02-06T10:00:00Z'
+            path: /api/v1/tasks
+
+    Unauthorized:
+      description: Missing or invalid JWT token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Unauthorized
+            message: Missing or invalid authentication token
+            timestamp: '2026-02-06T10:00:00Z'
+            path: /api/v1/tasks
+
+    Forbidden:
+      description: Valid token but insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Forbidden
+            message: You do not have permission to perform this action
+            timestamp: '2026-02-06T10:00:00Z'
+            path: /api/v1/tasks
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: NotFound
+            message: Task not found
+            timestamp: '2026-02-06T10:00:00Z'
+            path: /api/v1/tasks/123
+
+    Conflict:
+      description: Resource conflict (e.g., duplicate assignment)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Conflict
+            message: User is already assigned to this task
+            timestamp: '2026-02-06T10:00:00Z'
+            path: /api/v1/tasks/123/assignments

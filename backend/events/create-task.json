@@ -1,0 +1,22 @@
+{
+    "httpMethod": "POST",
+    "path": "/api/v1/tasks",
+    "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer mock-token"
+    },
+    "requestContext": {
+        "requestId": "test-request-id",
+        "authorizer": {
+            "claims": {
+                "sub": "user-123",
+                "name": "Test User",
+                "email": "test@amalitech.com",
+                "cognito:groups": [
+                    "Admin"
+                ]
+            }
+        }
+    },
+    "body": "{\"title\": \"Test Task\", \"description\": \"A test task\", \"priority\": \"HIGH\"}"
+}

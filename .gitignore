@@ -1,0 +1,76 @@
+# Dependencies
+node_modules/
+dist/
+.npm
+
+# Build outputs
+*.zip
+*.tgz
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+tfplan
+*.tfplan
+plan.txt
+
+# SAM
+.aws-sam/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# =============================================================================
+# Project-specific: Do not push to GitHub
+# =============================================================================
+
+# Agent / rules / internal planning (Cursor AI, roadmap, context)
+.agent/
+
+# Documentation - keep only OpenAPI spec
+docs/*
+!docs/openapi.yaml
+
+# Internal planning
+implementation_plan.md
+
+# Backend local config (table names, DynamoDB endpoint for local dev)
+backend/env.json
+backend/samconfig.toml
+
+# Terraform backend config (contains bucket names, sensitive)
+terraform/backend.hcl
+
+# Terraform secrets (terraform.tfvars contains SES, domains, Cognito URLs - covered by *.tfvars above)

@@ -1,0 +1,32 @@
+# =============================================================================
+# Dev Environment - Terraform Variables
+# =============================================================================
+# Copy to terraform.tfvars and fill in your values:
+#   copy terraform.tfvars.example terraform.tfvars   (Windows)
+#   cp terraform.tfvars.example terraform.tfvars    (Linux/Mac)
+#
+# terraform.tfvars is auto-loaded by Terraform - no -var-file needed.
+# Just run: terraform plan   and   terraform apply
+#
+# terraform.tfvars is in .gitignore - DO NOT commit it.
+# =============================================================================
+
+# Project
+project_name        = "taskmanager"
+environment         = "dev"
+aws_region          = "eu-west-1"
+cors_allowed_origin = "*"
+
+# SES - verified sender email for notifications
+ses_from_email = "your-verified-email@example.com"
+
+# Cognito - allowed callback URLs (add Amplify URL after deploy)
+cognito_callback_urls = ["http://localhost:5173/", "http://localhost:5173"]
+cognito_logout_urls   = ["http://localhost:5173", "http://localhost:5173/"]
+
+# Allowed email domains for sign-up (comma-separated)
+allowed_domains = "amalitech.com,amalitechtraining.org"
+
+# Amplify - optional, leave null to connect manually in Console
+amplify_repository_url = null
+amplify_github_token   = null

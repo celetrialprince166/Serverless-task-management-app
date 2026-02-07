@@ -1,0 +1,61 @@
+{
+    "name": "taskmanager-backend",
+    "version": "1.0.0",
+    "description": "Serverless Task Management System - Backend Lambda Functions",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "node scripts/build.js",
+        "watch": "tsc -w",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage",
+        "lint": "eslint src --ext .ts",
+        "lint:fix": "eslint src --ext .ts --fix",
+        "format": "prettier --write \"src/**/*.ts\"",
+        "format:check": "prettier --check \"src/**/*.ts\"",
+        "clean": "rimraf dist",
+        "prebuild": "npm run clean",
+        "package": "npm run build && cd dist && zip -r ../lambda.zip .",
+        "sam:start": "sam local start-api",
+        "sam:invoke": "sam local invoke"
+    },
+    "keywords": [
+        "serverless",
+        "aws",
+        "lambda",
+        "dynamodb",
+        "typescript"
+    ],
+    "author": "Prince Ayiku",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/aws-lambda": "^8.10.145",
+        "@types/jest": "^29.5.14",
+        "@types/node": "^20.17.12",
+        "@types/uuid": "^10.0.0",
+        "@typescript-eslint/eslint-plugin": "^8.20.0",
+        "@typescript-eslint/parser": "^8.20.0",
+        "esbuild": "^0.24.2",
+        "eslint": "^8.57.1",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.2.2",
+        "jest": "^29.7.0",
+        "prettier": "^3.4.2",
+        "rimraf": "^6.0.1",
+        "ts-jest": "^29.2.5",
+        "typescript": "^5.7.3"
+    },
+    "dependencies": {
+        "@aws-sdk/client-cognito-identity-provider": "^3.712.0",
+        "@aws-sdk/client-dynamodb": "^3.712.0",
+        "@aws-sdk/client-ses": "^3.712.0",
+        "@aws-sdk/client-sns": "^3.712.0",
+        "@aws-sdk/lib-dynamodb": "^3.712.0",
+        "@aws-sdk/util-dynamodb": "^3.712.0",
+        "joi": "^17.13.3",
+        "uuid": "^11.0.4"
+    },
+    "engines": {
+        "node": ">=20.0.0"
+    }
+}
