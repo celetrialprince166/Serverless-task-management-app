@@ -63,7 +63,7 @@ describe('Assign Task Handler', () => {
     it('should return 400 if body is missing', async () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
-        const event = createMockAuthEvent(null, { id: 'task-123' }, 'admin');
+        const event = createMockAuthEvent(null, { taskId: 'task-123' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(400);
@@ -78,7 +78,7 @@ describe('Assign Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent({ userIds: ['user-1'] }, { id: 'nonexistent-task' }, 'admin');
+        const event = createMockAuthEvent({ userIds: ['user-1'] }, { taskId: 'nonexistent-task' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(404);
@@ -99,7 +99,7 @@ describe('Assign Task Handler', () => {
 
         const event = createMockAuthEvent(
             { userIds: ['user-1', 'user-2'] },
-            { id: 'task-123' },
+            { taskId: 'task-123' },
             'admin',
             'assigner-123'
         );
@@ -137,7 +137,7 @@ describe('Assign Task Handler', () => {
 
         const event = createMockAuthEvent(
             { userIds: ['user-1', 'user-2'] },
-            { id: 'task-123' },
+            { taskId: 'task-123' },
             'admin',
             'assigner-123'
         );

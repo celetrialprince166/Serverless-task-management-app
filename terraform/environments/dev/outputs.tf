@@ -50,13 +50,13 @@ output "authorizer_id" {
   value       = module.cognito.authorizer_id
 }
 
-# Amplify Frontend
-output "amplify_app_id" {
-  description = "Amplify App ID"
-  value       = module.amplify.app_id
-}
+# # Amplify Frontend
+# output "amplify_app_id" {
+#   description = "Amplify App ID"
+#   value       = module.amplify.app_id
+# }
 
-output "amplify_branch_url" {
-  description = "Amplify deployed frontend URL"
-  value       = module.amplify.branch_url
-}
+# output "amplify_branch_url" {
+#   description = "Amplify deployed frontend URL"
+#   value       = module.amplify.branch_url
+# }

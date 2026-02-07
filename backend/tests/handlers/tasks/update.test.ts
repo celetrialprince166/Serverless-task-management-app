@@ -64,7 +64,7 @@ describe('Update Task Handler', () => {
     it('should return 400 if body is missing', async () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
-        const event = createMockAuthEvent(null, { id: 'task-123' }, 'admin');
+        const event = createMockAuthEvent(null, { taskId: 'task-123' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(400);
@@ -76,7 +76,7 @@ describe('Update Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent({ title: 'Updated Title' }, { id: 'nonexistent-task' }, 'admin');
+        const event = createMockAuthEvent({ title: 'Updated Title' }, { taskId: 'nonexistent-task' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(404);
@@ -87,11 +87,11 @@ describe('Update Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'member' });
         (requireRole as jest.Mock).mockReturnValue({ statusCode: 403, body: JSON.stringify({ message: 'Insufficient permissions' }) });
 
-        const event = createMockAuthEvent({ title: 'Updated Title' }, { id: 'task-123' }, 'member');
+        const event = createMockAuthEvent({ title: 'Updated Title' }, { taskId: 'task-123' }, 'member');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(403);
-        expect(JSON.parse(result.body).message).toBe('Insufficient permissions');
+        expect(JSON.parse(result.body).message).toBe('Members can only update task status');
     });
 
     it('should update a task successfully', async () => {
@@ -104,7 +104,7 @@ describe('Update Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent({ title: 'Updated Title' }, { id: 'task-123' }, 'admin');
+        const event = createMockAuthEvent({ title: 'Updated Title' }, { taskId: 'task-123' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
 
@@ -124,7 +124,7 @@ describe('Update Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent({ status: 'IN_PROGRESS' }, { id: 'task-123' }, 'admin');
+        const event = createMockAuthEvent({ status: 'IN_PROGRESS' }, { taskId: 'task-123' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
 

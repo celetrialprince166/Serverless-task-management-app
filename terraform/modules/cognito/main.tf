@@ -89,9 +89,9 @@ resource "aws_cognito_user_pool" "main" {
   dynamic "lambda_config" {
     for_each = var.enable_pre_signup_lambda || var.enable_post_confirmation_lambda ? [1] : []
     content {
-      pre_sign_up          = var.enable_pre_signup_lambda ? var.pre_signup_lambda_arn : null
-      post_confirmation    = var.enable_post_confirmation_lambda ? var.post_confirmation_lambda_arn : null
-      post_authentication  = var.enable_post_confirmation_lambda ? var.post_confirmation_lambda_arn : null
+      pre_sign_up         = var.enable_pre_signup_lambda ? var.pre_signup_lambda_arn : null
+      post_confirmation   = var.enable_post_confirmation_lambda ? var.post_confirmation_lambda_arn : null
+      post_authentication = var.enable_post_confirmation_lambda ? var.post_confirmation_lambda_arn : null
     }
   }
 

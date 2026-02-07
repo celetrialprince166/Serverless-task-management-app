@@ -29,7 +29,7 @@ resource "aws_amplify_app" "main" {
   access_token = var.github_access_token != null ? var.github_access_token : null
 
   # Enable auto branch creation for PR previews (optional)
-  enable_auto_branch_creation = var.enable_auto_branch_creation
+  enable_auto_branch_creation   = var.enable_auto_branch_creation
   auto_branch_creation_patterns = var.auto_branch_creation_patterns
 
   # Default redirect for SPA - all paths to index.html
@@ -51,7 +51,7 @@ resource "aws_amplify_branch" "main" {
   app_id      = aws_amplify_app.main.id
   branch_name = var.branch_name
 
-  enable_auto_build = true
+  enable_auto_build           = true
   enable_pull_request_preview = var.enable_pr_preview
 
   environment_variables = var.branch_environment_variables

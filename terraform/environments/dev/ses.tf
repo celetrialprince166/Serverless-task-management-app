@@ -11,6 +11,6 @@
 # ------------------------------------------------------------------------------
 
 resource "aws_ses_email_identity" "notifications_sender" {
-  count  = var.ses_create_sender_identity ? 1 : 0
-  email  = var.ses_from_email
+  count = var.ses_create_sender_identity ? 1 : 0
+  email = var.ses_from_email
 }

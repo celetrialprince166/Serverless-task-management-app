@@ -55,17 +55,16 @@ describe('List Users Handler', () => {
         jest.clearAllMocks();
     });
 
-    it('should return 403 if user is not admin', async () => {
+    it('should allow member to list users', async () => {
+        (scanItems as jest.Mock).mockResolvedValue([]);
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'member' });
-        (requireRole as jest.Mock).mockImplementation(() => ({
-            statusCode: 403,
-            body: JSON.stringify({ message: 'Insufficient permissions' }),
-        }));
+
         const event = createMockAuthEvent(null, null, 'member');
 
         const result = await lambdaHandler(event, mockContext);
-        expect(result.statusCode).toBe(403);
-        expect(JSON.parse(result.body).message).toBe('Insufficient permissions');
+        expect(result.statusCode).toBe(200);
+        const body = JSON.parse(result.body);
+        expect(body.data).toEqual([]);
     });
 
     it('should list users for admin', async () => {

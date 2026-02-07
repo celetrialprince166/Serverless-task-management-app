@@ -148,7 +148,7 @@ resource "aws_api_gateway_integration_response" "health_get_200" {
 
 # Dummy dependency when no external route gate is passed (avoids null in depends_on)
 resource "null_resource" "deployment_gate" {
-  count = var.deployment_depends_on != null ? 0 : 1
+  count    = var.deployment_depends_on != null ? 0 : 1
   triggers = {}
 }
 

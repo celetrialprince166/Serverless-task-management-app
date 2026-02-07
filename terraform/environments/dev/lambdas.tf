@@ -565,9 +565,9 @@ resource "aws_lambda_event_source_mapping" "tasks_stream_to_processor" {
 # SNS Topic → Email Formatter Lambda (allow SNS to invoke)
 resource "aws_lambda_permission" "sns_invoke_email_formatter" {
   statement_id  = "AllowExecutionFromSNS"
-  action         = "lambda:InvokeFunction"
+  action        = "lambda:InvokeFunction"
   function_name = module.lambda_email_formatter.function_name
-  principal      = "sns.amazonaws.com"
+  principal     = "sns.amazonaws.com"
   source_arn    = module.notifications.task_events_topic_arn
 }
 

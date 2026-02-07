@@ -58,7 +58,7 @@ describe('Unassign Task Handler', () => {
     it('should return 400 if user ID is missing', async () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
-        const event = createMockAuthEvent(null, { id: 'task-123' }, 'admin');
+        const event = createMockAuthEvent(null, { taskId: 'task-123' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(400);
@@ -70,7 +70,7 @@ describe('Unassign Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent(null, { id: 'nonexistent-task', userId: 'user-1' }, 'admin');
+        const event = createMockAuthEvent(null, { taskId: 'nonexistent-task', userId: 'user-1' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(404);
@@ -84,7 +84,7 @@ describe('Unassign Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent(null, { id: 'task-123', userId: 'unassigned-user' }, 'admin');
+        const event = createMockAuthEvent(null, { taskId: 'task-123', userId: 'unassigned-user' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(404);
@@ -99,7 +99,7 @@ describe('Unassign Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent(null, { id: 'task-123', userId: 'user-1' }, 'admin');
+        const event = createMockAuthEvent(null, { taskId: 'task-123', userId: 'user-1' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
 

@@ -136,7 +136,7 @@ describe('Auth Integration Tests (Real Middleware)', () => {
     describe('RBAC: Granular Permissions (Update Status)', () => {
         it('should return 403 when Member tries to update full task details', async () => {
             const jsCodeBody = { title: 'Hacked Title' }; // Member trying to change title
-            const event = createMockAuthEvent(jsCodeBody, { id: 'task-1' }, 'member', 'user-123');
+            const event = createMockAuthEvent(jsCodeBody, { taskId: 'task-1' }, 'member', 'user-123');
 
             // Update handler usually fetches task first to check assignment
             // We need to mock getItem to return a task assigned to this user

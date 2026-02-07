@@ -48,7 +48,7 @@ describe('Get User Handler', () => {
         (getItem as jest.Mock).mockResolvedValue(undefined);
 
         const event = {
-            pathParameters: { id: 'nonexistent-user' },
+            pathParameters: { userId: 'nonexistent-user' },
             path: '/users/nonexistent-user',
             requestContext: { authorizer: { claims: { sub: 'user-123' } } },
         } as unknown as APIGatewayProxyEvent;
@@ -62,7 +62,7 @@ describe('Get User Handler', () => {
         (getItem as jest.Mock).mockResolvedValue(mockExistingUser);
 
         const event = {
-            pathParameters: { id: 'user-123' },
+            pathParameters: { userId: 'user-123' },
             path: '/users/user-123',
             requestContext: { authorizer: { claims: { sub: 'other-user' } } },
         } as unknown as APIGatewayProxyEvent;

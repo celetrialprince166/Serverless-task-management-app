@@ -1,6 +1,6 @@
 
 import { handler } from '@handlers/tasks/get';
-import { TABLES, getItem } from '@lib';
+import { TABLES, getItem, queryItems } from '@lib';
 import { Context } from 'aws-lambda';
 import { createMockAuthEvent } from '../../helpers';
 
@@ -8,9 +8,11 @@ import { createMockAuthEvent } from '../../helpers';
 jest.mock('@lib', () => ({
     ...jest.requireActual('@lib'),
     getItem: jest.fn(),
+    queryItems: jest.fn(),
     Logger: jest.fn().mockImplementation(() => ({
         setRequestId: jest.fn(),
         info: jest.fn(),
+        warn: jest.fn(),
         error: jest.fn(),
     })),
 }));
@@ -53,6 +55,7 @@ describe('Get Task Handler', () => {
     });
 
     it('should return task if found', async () => {
+        (queryItems as jest.Mock).mockResolvedValue([]);
         const mockItem = {
             id: 'task-123',
             title: 'Test Task',

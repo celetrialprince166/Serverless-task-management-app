@@ -56,7 +56,7 @@ describe('Delete Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent(null, { id: 'nonexistent-task' }, 'admin');
+        const event = createMockAuthEvent(null, { taskId: 'nonexistent-task' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(404);
@@ -70,7 +70,7 @@ describe('Delete Task Handler', () => {
             body: JSON.stringify({ message: 'Insufficient permissions' }),
         }));
 
-        const event = createMockAuthEvent(null, { id: 'task-123' }, 'member');
+        const event = createMockAuthEvent(null, { taskId: 'task-123' }, 'member');
 
         const result = await lambdaHandler(event, mockContext);
         expect(result.statusCode).toBe(403);
@@ -84,7 +84,7 @@ describe('Delete Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent(null, { id: 'task-123' }, 'admin');
+        const event = createMockAuthEvent(null, { taskId: 'task-123' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
 
@@ -110,7 +110,7 @@ describe('Delete Task Handler', () => {
         (extractUser as jest.Mock).mockReturnValue({ userId: 'user-123', role: 'admin' });
         (requireRole as jest.Mock).mockReturnValue(null);
 
-        const event = createMockAuthEvent(null, { id: 'task-123' }, 'admin');
+        const event = createMockAuthEvent(null, { taskId: 'task-123' }, 'admin');
 
         const result = await lambdaHandler(event, mockContext);
 
