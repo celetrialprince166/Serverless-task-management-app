@@ -40,10 +40,10 @@ export const handler = async (
         try {
             const eventName = record.eventName;
             const newImage = record.dynamodb?.NewImage
-                ? (unmarshall(record.dynamodb.NewImage as Record<string, unknown>) as Record<string, unknown>)
+                ? (unmarshall(record.dynamodb.NewImage as Record<string, import('@aws-sdk/client-dynamodb').AttributeValue>) as Record<string, unknown>)
                 : null;
             const oldImage = record.dynamodb?.OldImage
-                ? (unmarshall(record.dynamodb.OldImage as Record<string, unknown>) as Record<string, unknown>)
+                ? (unmarshall(record.dynamodb.OldImage as Record<string, import('@aws-sdk/client-dynamodb').AttributeValue>) as Record<string, unknown>)
                 : null;
 
             const newSk = newImage ? getSk(newImage) : null;
