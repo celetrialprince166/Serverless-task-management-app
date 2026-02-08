@@ -60,13 +60,20 @@ export const MemberDashboard: React.FC = () => {
         try {
             const updatedTask = await updateTaskStatus(taskId, { status: newStatus });
 
-            // Update local state and selected task
-            setTasks(prevTasks => prevTasks.map(t =>
-                t.id === taskId ? updatedTask : t
-            ));
+            // Preserve assignees if API response omits them (defensive merge)
+            const mergedTask = (prev: Task): Task => ({
+                ...updatedTask,
+                assignedTo: updatedTask.assignedTo?.length
+                    ? updatedTask.assignedTo
+                    : prev.assignedTo ?? [],
+            });
+
+            setTasks(prevTasks =>
+                prevTasks.map(t => (t.id === taskId ? mergedTask(t) : t))
+            );
 
             if (selectedTask?.id === taskId) {
-                setSelectedTask(updatedTask);
+                setSelectedTask(mergedTask(selectedTask));
             }
         } catch (err) {
             console.error('Failed to update task status:', err);

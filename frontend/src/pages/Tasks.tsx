@@ -137,8 +137,22 @@ export const TasksPage: React.FC = () => {
 
     const handleStatusChange = async (taskId: string, status: TaskStatus) => {
         try {
-            await updateTaskStatus(taskId, { status });
-            fetchTasks();
+            const updatedTask = await updateTaskStatus(taskId, { status });
+            // Preserve assignees if API response omits them
+            const merged = (prev: Task): Task => ({
+                ...updatedTask,
+                assignedTo:
+                    updatedTask.assignedTo?.length
+                        ? updatedTask.assignedTo
+                        : prev.assignedTo ?? [],
+            });
+            setTasks(prev =>
+                prev.map(t => (t.id === taskId ? merged(t) : t))
+            );
+            if (selectedTask?.id === taskId) {
+                setSelectedTask(merged(selectedTask));
+            }
+            fetchTasks(); // Refresh list in background for consistency
         } catch (err) {
             console.error('Failed to update task status:', err);
             alert(err instanceof Error ? err.message : 'Failed to update status');
@@ -148,7 +162,19 @@ export const TasksPage: React.FC = () => {
     const handleTaskDrop = async (taskId: string, newStatus: TaskStatus) => {
         try {
             const updatedTask = await updateTaskStatus(taskId, { status: newStatus });
-            setTasks(prev => prev.map(t => (t.id === taskId ? updatedTask : t)));
+            setTasks(prev =>
+                prev.map(t =>
+                    t.id === taskId
+                        ? {
+                              ...updatedTask,
+                              assignedTo:
+                                  updatedTask.assignedTo?.length
+                                      ? updatedTask.assignedTo
+                                      : t.assignedTo ?? [],
+                          }
+                        : t
+                )
+            );
         } catch (err) {
             console.error('Failed to update task status:', err);
             alert(err instanceof Error ? err.message : 'Failed to update status');

@@ -7,18 +7,21 @@
  */
 import type { ResourcesConfig } from 'aws-amplify';
 
-// Fallbacks for local dev when .env is not configured
-const userPoolId =
-    import.meta.env.VITE_COGNITO_USER_POOL_ID ?? '';
-const userPoolClientId =
-    import.meta.env.VITE_COGNITO_CLIENT_ID ?? '';
-const region = import.meta.env.VITE_AWS_REGION ?? '';
+const userPoolId = import.meta.env.VITE_COGNITO_USER_POOL_ID;
+const userPoolClientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+const region = import.meta.env.VITE_AWS_REGION ?? 'eu-west-1';
+
+if (!userPoolId || !userPoolClientId) {
+    console.warn(
+        'Amplify Auth config missing. Set VITE_COGNITO_USER_POOL_ID and VITE_COGNITO_CLIENT_ID in .env or Amplify environment variables.'
+    );
+}
 
 const amplifyConfig: ResourcesConfig = {
     Auth: {
         Cognito: {
-            userPoolId,
-            userPoolClientId,
+            userPoolId: userPoolId ?? '',
+            userPoolClientId: userPoolClientId ?? '',
             signUpVerificationMethod: 'code',
             loginWith: {
                 email: true,
