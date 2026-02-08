@@ -9,10 +9,10 @@ import type { ResourcesConfig } from 'aws-amplify';
 
 // Fallbacks for local dev when .env is not configured
 const userPoolId =
-    import.meta.env.VITE_COGNITO_USER_POOL_ID ?? 'eu-west-1_FYTRu8tiS';
+    import.meta.env.VITE_COGNITO_USER_POOL_ID ?? '';
 const userPoolClientId =
-    import.meta.env.VITE_COGNITO_CLIENT_ID ?? '7hcomukkp5j7i36elpggbnld94';
-const region = import.meta.env.VITE_AWS_REGION ?? 'eu-west-1';
+    import.meta.env.VITE_COGNITO_CLIENT_ID ?? '';
+const region = import.meta.env.VITE_AWS_REGION ?? '';
 
 const amplifyConfig: ResourcesConfig = {
     Auth: {
@@ -38,7 +38,7 @@ const amplifyConfig: ResourcesConfig = {
 export const apiConfig = {
     baseUrl:
         import.meta.env.VITE_API_BASE_URL ??
-        'https://a9206bd8od.execute-api.eu-west-1.amazonaws.com/dev/api/v1',
+        '',
     region: region,
 };
 
